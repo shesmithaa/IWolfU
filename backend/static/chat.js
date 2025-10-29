@@ -54,4 +54,3 @@ sendBtn.onclick = () => {
 messageInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendBtn.click();
 });
-
