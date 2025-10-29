@@ -1,16 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>IWolfU – Shesh Chat</title>
+  <meta charset="UTF-8">
+  <title>🐺 IWolfU – Shesh Chat</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <h1>🐺 IWolfU Chat</h1>
-  <div id="chatbox"></div>
+  <div id="loginContainer">
+    <h1>🐺 IWolfU Chat</h1>
+    <input id="username" placeholder="Enter your nickname..." />
+    <button id="joinBtn">Join Chat</button>
+  </div>
 
-  <input id="messageInput" placeholder="Type a message..." autocomplete="off">
-  <button id="sendBtn">Send</button>
+  <div id="chatContainer" class="hidden">
+    <h2>Live Chat</h2>
+    <div id="chatbox"></div>
+    <input id="messageInput" placeholder="Type a message..." autocomplete="off">
+    <button id="sendBtn">Send</button>
+  </div>
 
   <script src="/static/chat.js"></script>
 </body>
