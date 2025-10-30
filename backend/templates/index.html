@@ -6,17 +6,32 @@
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+  <!-- Login Screen -->
   <div id="loginContainer">
     <h1>🐺 IWolfU Chat</h1>
     <input id="username" placeholder="Enter your nickname..." />
     <button id="joinBtn">Join Chat</button>
   </div>
 
+  <!-- Chat Screen -->
   <div id="chatContainer" class="hidden">
     <h2>Live Chat</h2>
-    <div id="chatbox"></div>
-    <input id="messageInput" placeholder="Type a message..." autocomplete="off">
-    <button id="sendBtn">Send</button>
+
+    <div class="chat-layout">
+      <!-- Main chat messages -->
+      <div id="chatbox"></div>
+
+      <!-- Online users sidebar -->
+      <div id="usersList">
+        <h3>Online</h3>
+      </div>
+    </div>
+
+    <!-- Message input area -->
+    <div class="input-area">
+      <input id="messageInput" placeholder="Type a message..." autocomplete="off">
+      <button id="sendBtn">Send</button>
+    </div>
   </div>
 
   <script src="/static/chat.js"></script>
