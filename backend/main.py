@@ -69,9 +69,14 @@ manager = ConnectionManager()
 
 
 # ---------- WebSocket Endpoint ----------
+import base64
+
 @app.websocket("/ws/{username}/{avatar}")
 async def websocket_endpoint(websocket: WebSocket, username: str, avatar: str):
+    avatar = base64.b64decode(avatar).decode()  # decode safely
     await manager.connect(websocket, username, avatar)
+
+
     try:
         while True:
             data = await websocket.receive_json()

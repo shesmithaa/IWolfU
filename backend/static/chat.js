@@ -52,11 +52,12 @@ function addMessage(data) {
 function startChat() {
   const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 
-  ws = new WebSocket(
-    wsProtocol +
-      window.location.host +
-      `/ws/${encodeURIComponent(username)}/${encodeURIComponent(avatarUrl)}`
-  );
+const encodedAvatar = btoa(avatarUrl); // safely encode
+ws = new WebSocket(
+  wsProtocol + window.location.host + `/ws/${encodeURIComponent(username)}/${encodedAvatar}`
+);
+
+
 
   ws.onopen = async () => {
     console.log("Connected to WebSocket ✅");
