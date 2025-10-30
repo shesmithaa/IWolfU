@@ -65,10 +65,14 @@ manager = ConnectionManager()
 
 @app.websocket("/ws/{username}/{avatar}")
 async def websocket_endpoint(websocket: WebSocket, username: str, avatar: str):
+    await websocket.accept()  # 👈 Required before sending/receiving data
     await manager.connect(websocket, username, avatar)
     try:
         while True:
             data = await websocket.receive_json()
+            if data.get("type") == "reaction":
+                await manager.broadcast_message(data)
+                continue
             messages = load_messages()
             messages.append(data)
             save_messages(messages)
@@ -76,3 +80,4 @@ async def websocket_endpoint(websocket: WebSocket, username: str, avatar: str):
     except WebSocketDisconnect:
         manager.disconnect(username)
         await manager.broadcast_user_list()
+
