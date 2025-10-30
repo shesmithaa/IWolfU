@@ -6,19 +6,21 @@ import json, os
 
 app = FastAPI()
 
-# Serve frontend
+# ---------- Serve frontend ----------
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 CHAT_FILE = "messages.json"
 
-# ---------- UTILITIES ----------
+
+# ---------- Utilities ----------
 def load_messages():
     if not os.path.exists(CHAT_FILE):
         with open(CHAT_FILE, "w") as f:
             json.dump([], f)
     with open(CHAT_FILE, "r") as f:
         return json.load(f)
+
 
 def save_messages(messages):
     with open(CHAT_FILE, "w") as f:
@@ -35,11 +37,10 @@ async def get_messages():
     return load_messages()
 
 
-# ---------- IMPROVED CHAT MANAGER (with user list + avatars) ----------
+# ---------- Chat Manager ----------
 class ConnectionManager:
     def __init__(self):
-        # username -> {"ws": WebSocket, "avatar": str}
-        self.users = {}
+        self.users = {}  # username -> {"ws": websocket, "avatar": url}
 
     async def connect(self, websocket: WebSocket, username: str, avatar: str):
         await websocket.accept()
@@ -51,32 +52,39 @@ class ConnectionManager:
             del self.users[username]
 
     async def broadcast_user_list(self):
-        users = [{"name": name, "avatar": data["avatar"]} for name, data in self.users.items()]
-        for data in self.users.values():
-            await data["ws"].send_json({"type": "user_list", "users": users})
+        users = [{"name": u, "avatar": info["avatar"]} for u, info in self.users.items()]
+        for info in self.users.values():
+            await info["ws"].send_json({"type": "user_list", "users": users})
 
-    async def broadcast_message(self, msg):
-        for data in self.users.values():
-            await data["ws"].send_json({"type": "message", "data": msg})
+    async def broadcast_message(self, msg: dict):
+        for info in self.users.values():
+            await info["ws"].send_json({"type": "message", "data": msg})
+
+    async def broadcast_reaction(self, reaction: dict):
+        for info in self.users.values():
+            await info["ws"].send_json({"type": "reaction", **reaction})
 
 
 manager = ConnectionManager()
 
+
+# ---------- WebSocket Endpoint ----------
 @app.websocket("/ws/{username}/{avatar}")
 async def websocket_endpoint(websocket: WebSocket, username: str, avatar: str):
-    await websocket.accept()
     await manager.connect(websocket, username, avatar)
     try:
         while True:
             data = await websocket.receive_json()
+
             if data.get("type") == "reaction":
-                await manager.broadcast_message(data)
+                await manager.broadcast_reaction(data)
                 continue
+
             messages = load_messages()
             messages.append(data)
             save_messages(messages)
             await manager.broadcast_message(data)
+
     except WebSocketDisconnect:
         manager.disconnect(username)
         await manager.broadcast_user_list()
-
