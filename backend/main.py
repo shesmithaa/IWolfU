@@ -64,31 +64,19 @@ manager = ConnectionManager()
 
 @app.websocket("/ws/{username}/{avatar}")
 async def websocket_endpoint(websocket: WebSocket, username: str, avatar: str):
-    # 👇 This line must come FIRST
     await websocket.accept()
-
-    # Then register the connection with manager
     await manager.connect(websocket, username, avatar)
-
     try:
         while True:
             data = await websocket.receive_json()
-
-            # Handle emoji reactions
             if data.get("type") == "reaction":
                 await manager.broadcast_message(data)
                 continue
-
-            # Save chat messages
             messages = load_messages()
             messages.append(data)
             save_messages(messages)
-
-            # Broadcast new message
             await manager.broadcast_message(data)
-
     except WebSocketDisconnect:
         manager.disconnect(username)
         await manager.broadcast_user_list()
-
 
